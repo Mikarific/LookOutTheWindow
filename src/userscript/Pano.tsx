@@ -4,6 +4,7 @@ import * as THREE from 'three';
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls';
 import { effect } from 'solid-js/web';
 import { store } from './store';
+import { PanoControls } from './pano/PanoControls';
 import * as streetview from './pano/streetview';
 
 const SKYBOX_RADIUS = 500;
@@ -28,15 +29,13 @@ export function Pano() {
   const renderer = new THREE.WebGLRenderer({ antialias: true });
   const rerender = () => renderer.render(scene, camera);
 
-  const controls = new OrbitControls(camera, renderer.domElement);
-  controls.enablePan = false;
-  controls.enableZoom = true;
+  const controls = new PanoControls(camera, renderer.domElement);
 
-  const [isPanning, setIsPanning] = createSignal(false);
-  renderer.domElement.addEventListener('mousedown', () => setIsPanning(true));
-  renderer.domElement.addEventListener('mouseup', () => setIsPanning(false));
+  const [isRotating, setIsRotating] = createSignal(false);
+  controls.addEventListener('rotationStart', () => setIsRotating(true));
+  controls.addEventListener('rotationEnd', () => setIsRotating(false));
   effect(() => {
-    renderer.domElement.classList.toggle(styles['pano--panning'], isPanning());
+    renderer.domElement.classList.toggle(styles['pano--panning'], isRotating());
   });
 
   const panoCanvasCtx = document.createElement('canvas').getContext('2d')!;
