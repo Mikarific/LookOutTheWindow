@@ -20,6 +20,11 @@ export function Pano() {
   );
   camera.position.set(0, 0, 1);
 
+  const light = new THREE.DirectionalLight(0xffffff, 1);
+  light.position.set(100, 100, 0);
+  light.target.position.set(0, 0, 0);
+  scene.add(light);
+
   const renderer = new THREE.WebGLRenderer({ antialias: true });
   const rerender = () => renderer.render(scene, camera);
 
