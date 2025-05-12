@@ -82,9 +82,10 @@ export function Pano() {
   });
 
   const handleWindowResize = () => {
+    renderer.setSize(window.innerWidth, window.innerHeight);
+
     camera.aspect = renderer.domElement.width / renderer.domElement.height;
     camera.updateProjectionMatrix();
-    renderer.setSize(window.innerWidth, window.innerHeight);
 
     rerender();
   };
