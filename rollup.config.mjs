@@ -39,7 +39,7 @@ const externalModuleMapping = {
       as: 'VM.solid.store'
     }
   ],
-  'https://cdn.jsdelivr.net/npm/three-js@79.0.0/three.min.js': [ // TODO(netux): migrate to a newer version of three.js
+  'https://cdn.jsdelivr.net/npm/three@0.147.0/build/three.min.js': [ // TODO(netux): migrate to a newer version of three.js?
     {
       provides: 'three',
       as: 'THREE'
