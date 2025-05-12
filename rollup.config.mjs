@@ -64,7 +64,7 @@ const iifeGlobalsMapping = Object.fromEntries(
 
 export default defineConfig(
   /** @type {import('rollup').RollupOptions} */ (Object.entries({
-    'look-out-the-window': 'src/look-out-the-window/index.tsx',
+    'look-out-the-window': 'src/userscript/index.tsx',
   }).map(([name, entry]) => ({
     input: entry,
     plugins: [

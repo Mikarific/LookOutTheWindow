@@ -60,12 +60,6 @@ framework.vdom.container.then((vdomContainer) => {
   });
 });
 
-/* #region DONOTCOMMIT */
-// eslint-disable-next-line @typescript-eslint/ban-ts-comment
-// @ts-ignore
-unsafeWindow.DEBUG__setStore = setStore;
-/* #endregion DONOTCOMMIT */
-
 framework.dom.container.then(async (containerEl) => {
   requestIdleCallback(() => {
     const originalPanoEl = containerEl.querySelector('#pano')!;

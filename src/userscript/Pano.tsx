@@ -60,24 +60,6 @@ export function Pano() {
 
   const panoCanvasCtx = document.createElement('canvas').getContext('2d')!;
 
-  /* #region DONOTCOMMIT */
-  Object.assign(panoCanvasCtx.canvas.style, {
-    position: 'fixed',
-    zIndex: (Number.MAX_SAFE_INTEGER - 1).toString(),
-    width: '95vw',
-    opacity: '0.3',
-  });
-
-  panoCanvasCtx.canvas.addEventListener('mouseenter', () => {
-    panoCanvasCtx.canvas.style.opacity = '1';
-  });
-  panoCanvasCtx.canvas.addEventListener('mouseleave', () => {
-    panoCanvasCtx.canvas.style.opacity = '0.3';
-  });
-
-  document.body.appendChild(panoCanvasCtx.canvas);
-  /* #endregion DONOTCOMMIT */
-
   function createSkyMesh() {
     const sphereGeo = new three.SphereGeometry(
       SKYBOX_RADIUS,
