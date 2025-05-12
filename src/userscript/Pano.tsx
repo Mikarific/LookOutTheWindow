@@ -1,6 +1,7 @@
-import { onCleanup, onMount } from 'solid-js';
+import { createSignal, onCleanup, onMount } from 'solid-js';
 import styles from './index.module.css';
 import * as three from 'three';
+import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls';
 import { effect } from 'solid-js/web';
 import { store } from './store';
 
@@ -53,10 +54,16 @@ export function Pano() {
   const renderer = new three.WebGLRenderer({ antialias: true });
   const rerender = () => renderer.render(scene, camera);
 
-  // TODO(netux): figure out how to import OrbitControls as an IIFE module from three/addons
-  // const controls = new OrbitControls(camera, renderer.domElement);
-  // controls.enablePan = true;
-  // controls.enableZoom = false;
+  const controls = new OrbitControls(camera, renderer.domElement);
+  controls.enablePan = true;
+  controls.enableZoom = true;
+
+  const [isPanning, setIsPanning] = createSignal(false);
+  renderer.domElement.addEventListener('mousedown', () => setIsPanning(true));
+  renderer.domElement.addEventListener('mouseup', () => setIsPanning(false));
+  effect(() => {
+    renderer.domElement.classList.toggle(styles['pano--panning'], isPanning());
+  });
 
   const panoCanvasCtx = document.createElement('canvas').getContext('2d')!;
 
@@ -139,7 +146,7 @@ export function Pano() {
     camera.updateProjectionMatrix();
     renderer.setSize(window.innerWidth, window.innerHeight);
 
-    renderCurrentPano();
+    rerender();
   };
   handleWindowResize();
 
@@ -149,6 +156,11 @@ export function Pano() {
 
   onCleanup(() => {
     window.removeEventListener('resize', handleWindowResize);
+  });
+
+  requestAnimationFrame(function rerenderLoop() {
+    rerender();
+    requestAnimationFrame(rerenderLoop);
   });
 
   renderer.domElement.classList.add(styles.pano);
