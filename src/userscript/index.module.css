@@ -9,27 +9,3 @@
     cursor: all-scroll;
   }
 }
-
-.window {
-  position: fixed;
-  width: 100%;
-  background-image: url('https://cloudy.netux.site/neal_internet_roadtrip/side window.png');
-  background-size: cover;
-  height: 100%;
-  background-position: center;
-  pointer-events: none;
-  transition: scale 100ms linear;
-
-  &.window--flip {
-    rotate: y 180deg;
-  }
-
-  &.window--back {
-    transform-origin: center 20%;
-    background-image: url('https://cloudy.netux.site/neal_internet_roadtrip/back window.png');
-  }
-
-  &.window--hide {
-    display: none;
-  }
-}
