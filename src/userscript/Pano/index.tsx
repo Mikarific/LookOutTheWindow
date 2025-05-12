@@ -86,6 +86,9 @@ export function Pano() {
     rerender();
   });
 
+  const [getVehicleObject, setVehicleObject] =
+    createSignal<THREE.Object3D | null>(null);
+
   {
     const gltfLoader = new GLTFLoader();
     gltfLoader
@@ -94,12 +97,23 @@ export function Pano() {
       )
       .then(({ scene: vehicleObject }) => {
         vehicleObject.position.set(0, -1, 0);
+
+        setVehicleObject(vehicleObject);
         scene.add(vehicleObject);
       })
       .catch((error) => {
         console.error('Could not load car :(', error);
       });
   }
+
+  effect(() => {
+    const vehicleObject = getVehicleObject();
+    if (vehicleObject == null) {
+      return;
+    }
+
+    vehicleObject.visible = store.settings.showVehicle;
+  });
 
   const handleWindowResize = () => {
     renderer.setSize(window.innerWidth, window.innerHeight);

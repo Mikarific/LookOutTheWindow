@@ -5,8 +5,13 @@ export enum Direction {
   LEFT = 3,
 }
 
-export interface StoreModel {
+export interface Settings {
+  showVehicle: boolean;
+}
+
+export interface Store {
   currentPano: string | null;
   currentHeading: number;
   facingDirection: Direction;
+  settings: Settings;
 }

@@ -9,3 +9,51 @@
     cursor: all-scroll;
   }
 }
+
+.settings-panel {
+  position: fixed;
+  top: 65%;
+  right: 0;
+  width: 190px;
+  font-size: 1rem;
+  background-color: #111;
+  color: #ccc;
+  border-bottom-left-radius: 4px;
+  transform: translate(100%, -50%);
+  transition: transform 0.3s ease-in-out;
+
+  &--open {
+    transform: translate(0, -50%);
+  }
+
+  &__toggle {
+    --size: 23px;
+
+    position: absolute;
+    top: 0;
+    left: calc(var(--size) * -1);
+    width: var(--size);
+    height: var(--size);
+    padding: 4px;
+    background-color: #00adff;
+    border-radius: 4px;
+    border-bottom-right-radius: 0;
+    border-top-right-radius: 0;
+    cursor: pointer;
+    color: #000;
+  }
+}
+
+.setting {
+  padding: 4px 8px;
+  display: flex;
+  align-items: center;
+
+  & > label {
+    width: 100%;
+  }
+
+  & > input[type='checkbox'] + label {
+    padding-inline: 0.8ch;
+  }
+}
