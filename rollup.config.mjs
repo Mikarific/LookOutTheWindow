@@ -45,6 +45,12 @@ const externalModuleMapping = {
       as: 'THREE'
     }
   ],
+  'https://cdn.jsdelivr.net/npm/three@0.147.0/examples/js/loaders/GLTFLoader.js': [
+    {
+      provides: 'three/examples/jsm/loaders/GLTFLoader',
+      as: 'THREE'
+    }
+  ],
   'https://cdn.jsdelivr.net/npm/internet-roadtrip-framework': [
     {
       provides: 'internet-roadtrip-framework',

@@ -1,7 +1,7 @@
 import { createSignal, onCleanup, onMount } from 'solid-js';
 import styles from './index.module.css';
 import * as THREE from 'three';
-import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls';
+import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader';
 import { effect } from 'solid-js/web';
 import { store } from './store';
 import { PanoControls } from './pano/PanoControls';
@@ -65,6 +65,8 @@ export function Pano() {
   const skyMesh = createSkyMesh();
   scene.add(skyMesh);
 
+  const [carObject, setCarObject] = createSignal<THREE.Object3D | null>(null);
+
   async function renderCurrentPano() {
     if (store.currentPano == null) {
       return;
@@ -80,10 +82,31 @@ export function Pano() {
   effect(renderCurrentPano);
 
   effect(() => {
+    const car = carObject();
+
     skyMesh.rotation.y = store.currentHeading;
+    if (car) {
+      car.rotation.y = -store.currentHeading;
+    }
 
     rerender();
   });
+
+  const gltfLoader = new GLTFLoader();
+  gltfLoader
+    .loadAsync(
+      'https://cloudy.netux.site/neal_internet_roadtrip/iinvalid-3d-low-poly-model/fixed-model.glb',
+    )
+    .then(({ scene: carObject }) => {
+      // TODO(netux): move camera instead, so we can rotate the vehicle?
+      carObject.position.set(0.3, -1, 0.9);
+
+      setCarObject(carObject);
+      scene.add(carObject);
+    })
+    .catch((error) => {
+      console.error('Could not load car :(', error);
+    });
 
   const handleWindowResize = () => {
     renderer.setSize(window.innerWidth, window.innerHeight);
