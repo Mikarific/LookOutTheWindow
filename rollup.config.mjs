@@ -97,14 +97,7 @@ export default defineConfig(
       commonjsPlugin(),
       jsonPlugin(),
       userscript((meta) => {
-        meta = meta.replace('PACKAGE_JSON_AUTHORS', [
-          packageJson.author?.name ?? '-',
-          ... (packageJson.contributors
-            ?.map((contributor) => typeof contributor === 'string'
-              ? contributor
-              : (contributor?.name ?? '-')
-          ) ?? [])
-        ].join(', '));
+        meta = meta.replace('PACKAGE_JSON_VERSION', packageJson.version);
 
         const metaLines = meta.split('\n');
 
@@ -123,7 +116,7 @@ export default defineConfig(
                   : contributor.name
               ) ?? []
             )
-          ].filter((authorName) => !!authorName)}`,
+          ].filter((authorName) => !!authorName).join(', ')}`,
           ... userScriptRequireUrls.map((url) => `// @require ${url}`)
         ];
 

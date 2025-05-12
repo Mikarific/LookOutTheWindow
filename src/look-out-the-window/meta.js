@@ -3,8 +3,8 @@
 // @namespace   me.netux.site/user-scripts/internet-roadtrip-look-out-the-window
 // @match       https://neal.fun/internet-roadtrip/*
 // @icon        https://www.google.com/s2/favicons?sz=64&domain=neal.fun
+// @version     PACKAGE_JSON_VERSION
 // @grant       GM_addStyle
-// @version     2.0
 // @grant       GM.xmlHttpRequest
 // ==/UserScript==
 
