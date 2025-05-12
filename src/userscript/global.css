@@ -2,4 +2,8 @@
   & #pano {
     display: none;
   }
+
+  & .voted {
+    pointer-events: none;
+  }
 }
