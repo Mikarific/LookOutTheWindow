@@ -75,7 +75,8 @@ export function Pano() {
     await streetview.loadAndRender(store.currentPano, panoCanvasCtx);
 
     skyMesh.material.map!.needsUpdate = true;
-    skyMesh.scale.y = panoCanvasCtx.canvas.height / panoCanvasCtx.canvas.width; // squish vertically to adjust to the aspect ratio of the equirectangular texture
+    scene.environment = skyMesh.material.map;
+    // skyMesh.scale.y = panoCanvasCtx.canvas.height / panoCanvasCtx.canvas.width; // squish vertically to adjust to the aspect ratio of the equirectangular texture
 
     rerender();
   }
