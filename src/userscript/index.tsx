@@ -35,10 +35,6 @@ framework.vdom.container.then((vdomContainer) => {
     enumerable: true,
   });
 
-  setStore({
-    currentPano: vdomContainer.data.currentPano || null,
-  });
-
   const { set: currentHeadingSetter } = Object.getOwnPropertyDescriptor(
     vdomContainer.state,
     'currentHeading',
@@ -56,6 +52,7 @@ framework.vdom.container.then((vdomContainer) => {
   });
 
   setStore({
+    currentPano: vdomContainer.data.currentPano || null,
     currentHeading: vdomContainer.data.currentHeading || 0,
   });
 });
