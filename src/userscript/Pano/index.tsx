@@ -19,7 +19,7 @@ export function Pano() {
     /* near: */ 0.1,
     /* far: */ 1000,
   );
-  camera.position.set(0, 0, 1);
+  camera.position.set(-0.3, 0, 0);
 
   const light = new THREE.DirectionalLight(0xffffff, 1);
   light.position.set(100, 100, 0);
@@ -39,46 +39,6 @@ export function Pano() {
   });
 
   const panoCanvasCtx = document.createElement('canvas').getContext('2d')!;
-
-  /* #region DONOTCOMMIT */
-  const DEBUG__container = document.createElement('div');
-  Object.assign(DEBUG__container.style, {
-    position: 'fixed',
-    zIndex: (Number.MAX_SAFE_INTEGER - 1).toString(),
-    width: '100%',
-    opacity: '0.3',
-    color: 'white',
-  });
-  DEBUG__container.addEventListener('mouseenter', () => {
-    DEBUG__container.style.opacity = '1';
-  });
-  DEBUG__container.addEventListener('mouseleave', () => {
-    DEBUG__container.style.opacity = '0.3';
-  });
-
-  Object.assign(panoCanvasCtx.canvas.style, {
-    width: '30%',
-    display: 'block',
-  });
-  panoCanvasCtx.canvas.addEventListener('click', () => {
-    panoCanvasCtx.canvas.style.width =
-      panoCanvasCtx.canvas.style.width === '100%' ? '30%' : '100%';
-  });
-  DEBUG__container.appendChild(panoCanvasCtx.canvas);
-
-  const DEBUG__text = document.createElement('span');
-  DEBUG__container.appendChild(DEBUG__text);
-
-  effect(() => {
-    DEBUG__text.textContent = [
-      `Current Pano: ${store.currentPano}`,
-      `Current Heading: ${store.currentHeading}`,
-      `Pano Canvas: ${panoCanvasCtx.canvas.width}x${panoCanvasCtx.canvas.height}`,
-    ].join(' | ');
-  });
-
-  document.body.appendChild(DEBUG__container);
-  /* #endregion DONOTCOMMIT */
 
   function createSkyMesh() {
     const sphereGeo = new THREE.SphereGeometry(
@@ -105,8 +65,6 @@ export function Pano() {
   const skyMesh = createSkyMesh();
   scene.add(skyMesh);
 
-  const [carObject, setCarObject] = createSignal<THREE.Object3D | null>(null);
-
   async function renderCurrentPano() {
     if (store.currentPano == null) {
       return;
@@ -123,31 +81,25 @@ export function Pano() {
   effect(renderCurrentPano);
 
   effect(() => {
-    const car = carObject();
-
     skyMesh.rotation.y = store.currentHeading;
-    if (car) {
-      car.rotation.y = -store.currentHeading;
-    }
 
     rerender();
   });
 
-  const gltfLoader = new GLTFLoader();
-  gltfLoader
-    .loadAsync(
-      'https://cloudy.netux.site/neal_internet_roadtrip/iinvalid-3d-low-poly-model/fixed-model.glb',
-    )
-    .then(({ scene: carObject }) => {
-      // TODO(netux): move camera instead, so we can rotate the vehicle?
-      carObject.position.set(0.3, -1, 0.9);
-
-      setCarObject(carObject);
-      scene.add(carObject);
-    })
-    .catch((error) => {
-      console.error('Could not load car :(', error);
-    });
+  {
+    const gltfLoader = new GLTFLoader();
+    gltfLoader
+      .loadAsync(
+        'https://cloudy.netux.site/neal_internet_roadtrip/iinvalid-3d-low-poly-model/fixed-model.glb',
+      )
+      .then(({ scene: vehicleObject }) => {
+        vehicleObject.position.set(0, -1, 0);
+        scene.add(vehicleObject);
+      })
+      .catch((error) => {
+        console.error('Could not load car :(', error);
+      });
+  }
 
   const handleWindowResize = () => {
     renderer.setSize(window.innerWidth, window.innerHeight);
