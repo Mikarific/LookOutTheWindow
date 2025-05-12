@@ -24,7 +24,7 @@ export function Pano() {
   const rerender = () => renderer.render(scene, camera);
 
   const controls = new OrbitControls(camera, renderer.domElement);
-  controls.enablePan = true;
+  controls.enablePan = false;
   controls.enableZoom = true;
 
   const [isPanning, setIsPanning] = createSignal(false);
