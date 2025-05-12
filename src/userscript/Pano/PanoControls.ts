@@ -12,7 +12,7 @@ export class PanoControls extends EventTarget {
     mouseX: number;
     mouseY: number;
     lon: number;
-    lat: number
+    lat: number;
   } | null = null;
 
   public get isRotating() {
@@ -42,7 +42,7 @@ export class PanoControls extends EventTarget {
         mouseX: event.clientX,
         mouseY: event.clientY,
         lat: this.lat,
-        lon: this.lon
+        lon: this.lon,
       };
 
       this.dispatchEvent(new Event('rotationStart'));
@@ -56,8 +56,12 @@ export class PanoControls extends EventTarget {
       const rotationZoomDamping = this.camera.fov / this.initialFov;
       const speed = this.rotateSpeed * rotationZoomDamping;
 
-      this.lon = (this.rotateStartCoords.mouseX - event.clientX) * speed + this.rotateStartCoords.lon;
-      this.lat = (event.clientY - this.rotateStartCoords.mouseY) * speed + this.rotateStartCoords.lat;
+      this.lon =
+        (this.rotateStartCoords.mouseX - event.clientX) * speed +
+        this.rotateStartCoords.lon;
+      this.lat =
+        (event.clientY - this.rotateStartCoords.mouseY) * speed +
+        this.rotateStartCoords.lat;
 
       this.update();
     });
@@ -69,7 +73,7 @@ export class PanoControls extends EventTarget {
       if (wasRotating) {
         this.dispatchEvent(new Event('rotationEnd'));
       }
-    }
+    };
 
     this.domElement.addEventListener('pointerup', endRotation);
     this.domElement.addEventListener('pointerleave', endRotation);
@@ -101,7 +105,7 @@ export class PanoControls extends EventTarget {
 
   update() {
     // Clamp so users cannot look too far up/down
-    this.lat = Math.max(-(89), Math.min(89, this.lat));
+    this.lat = Math.max(-89, Math.min(89, this.lat));
 
     // Stolen from https://github.com/mrdoob/three.js/blob/r147/examples/webgl_panorama_equirectangular.html#L189
     const phi = THREE.MathUtils.degToRad(90 - this.lat);

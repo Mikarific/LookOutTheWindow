@@ -1,11 +1,11 @@
 import { createSignal, onCleanup, onMount } from 'solid-js';
-import styles from './index.module.css';
+import styles from '../index.module.css';
 import * as THREE from 'three';
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader';
 import { effect } from 'solid-js/web';
-import { store } from './store';
-import { PanoControls } from './pano/PanoControls';
-import * as streetview from './pano/streetview';
+import { store } from '../store';
+import { PanoControls } from './PanoControls';
+import * as streetview from './streetview';
 
 const SKYBOX_RADIUS = 500;
 const SKYBOX_RESOLUTION = 64;
@@ -39,6 +39,46 @@ export function Pano() {
   });
 
   const panoCanvasCtx = document.createElement('canvas').getContext('2d')!;
+
+  /* #region DONOTCOMMIT */
+  const DEBUG__container = document.createElement('div');
+  Object.assign(DEBUG__container.style, {
+    position: 'fixed',
+    zIndex: (Number.MAX_SAFE_INTEGER - 1).toString(),
+    width: '100%',
+    opacity: '0.3',
+    color: 'white',
+  });
+  DEBUG__container.addEventListener('mouseenter', () => {
+    DEBUG__container.style.opacity = '1';
+  });
+  DEBUG__container.addEventListener('mouseleave', () => {
+    DEBUG__container.style.opacity = '0.3';
+  });
+
+  Object.assign(panoCanvasCtx.canvas.style, {
+    width: '30%',
+    display: 'block',
+  });
+  panoCanvasCtx.canvas.addEventListener('click', () => {
+    panoCanvasCtx.canvas.style.width =
+      panoCanvasCtx.canvas.style.width === '100%' ? '30%' : '100%';
+  });
+  DEBUG__container.appendChild(panoCanvasCtx.canvas);
+
+  const DEBUG__text = document.createElement('span');
+  DEBUG__container.appendChild(DEBUG__text);
+
+  effect(() => {
+    DEBUG__text.textContent = [
+      `Current Pano: ${store.currentPano}`,
+      `Current Heading: ${store.currentHeading}`,
+      `Pano Canvas: ${panoCanvasCtx.canvas.width}x${panoCanvasCtx.canvas.height}`,
+    ].join(' | ');
+  });
+
+  document.body.appendChild(DEBUG__container);
+  /* #endregion DONOTCOMMIT */
 
   function createSkyMesh() {
     const sphereGeo = new THREE.SphereGeometry(

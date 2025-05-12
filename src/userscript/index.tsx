@@ -25,9 +25,11 @@ framework.vdom.container.then((vdomContainer) => {
   )!;
   Object.defineProperty(vdomContainer.state, 'currentPano', {
     set(currentPano: string) {
+      /* #region DONOTCOMMIT */
       setStore({
         currentPano: currentPano || null,
       });
+      /* #endregion DONOTCOMMIT */
 
       return currentPanoSetter!.call(this, currentPano);
     },
@@ -51,10 +53,12 @@ framework.vdom.container.then((vdomContainer) => {
     enumerable: true,
   });
 
-  setStore({
-    currentPano: vdomContainer.data.currentPano || null,
-    currentHeading: vdomContainer.data.currentHeading || 0,
-  });
+  /* #region DONOTCOMMIT */
+  // setStore({
+  //   currentPano: vdomContainer.data.currentPano || null,
+  //   currentHeading: vdomContainer.data.currentHeading || 0,
+  // });
+  /* #endregion DONOTCOMMIT */
 });
 
 framework.dom.container.then(async (containerEl) => {
