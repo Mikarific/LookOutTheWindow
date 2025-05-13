@@ -6,6 +6,8 @@
 // @version     PACKAGE_JSON_VERSION
 // @grant       GM_addStyle
 // @grant       GM.xmlHttpRequest
+// @downloadURL https://github.com/netux/internet-roadtrip-LookOutTheWindow/releases/latest/download/look-out-the-window.user.js
+// @updateURL   https://github.com/netux/internet-roadtrip-LookOutTheWindow/releases/latest/download/look-out-the-window.user.js
 // ==/UserScript==
 
 /**
