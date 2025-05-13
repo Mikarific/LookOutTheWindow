@@ -95,7 +95,7 @@ export function Pano() {
     const gltfLoader = new GLTFLoader();
     gltfLoader
       .loadAsync(
-        'https://cloudy.netux.site/neal_internet_roadtrip/iinvalid-3d-low-poly-model/fixed-model.glb',
+        'https://cloudy.netux.site/neal_internet_roadtrip/iinvalid-3d-low-poly-model/model.glb',
       )
       .then(({ scene: vehicleObject }) => {
         vehicleObject.position.set(0, -1, 0);
