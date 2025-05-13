@@ -99,6 +99,7 @@ export function Pano() {
       )
       .then(({ scene: vehicleObject }) => {
         vehicleObject.position.set(0, -1, 0);
+        vehicleObject.getObjectByName('steering_wheel')!.visible = false;
 
         setVehicleObject(vehicleObject);
         scene.add(vehicleObject);
