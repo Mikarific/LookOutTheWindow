@@ -10,7 +10,7 @@
 
     Follow [this guide](https://www.tampermonkey.net/faq.php#Q209) to do learn how to enable Developer Mode.
 
-2. Get the script by [clicking here](https://github.com/netux/internet-roadtrip-LookOutTheWindow/releases/latest/download/look-out-the-window.user.js).
+2. Get the latest version of the userscript [clicking here](https://github.com/netux/internet-roadtrip-LookOutTheWindow/releases/latest/download/look-out-the-window.user.js).
 
 3. Reload any Internet Roadtrip tabs you have open.
 
