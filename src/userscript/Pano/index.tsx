@@ -27,6 +27,7 @@ export function Pano() {
   scene.add(light);
 
   const renderer = new THREE.WebGLRenderer({ antialias: true });
+  renderer.setClearColor(0x222222);
   const rerender = () => renderer.render(scene, camera);
 
   const controls = new PanoControls(camera, renderer.domElement);
@@ -52,7 +53,10 @@ export function Pano() {
       /* z: */ 1,
     );
 
-    return new THREE.Mesh(sphereGeo, new THREE.MeshBasicMaterial());
+    return new THREE.Mesh(
+      sphereGeo,
+      new THREE.MeshBasicMaterial({ opacity: 0, transparent: true }),
+    );
   }
   const skyMesh = createSkyMesh();
   scene.add(skyMesh);
