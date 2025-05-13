@@ -77,3 +77,11 @@ jobs:
 
               console.log(`Asset "${fileName}" uploaded to draft release`);
             }
+
+            await github.rest.repos.updateRelease({
+              ... context.repo,
+              release_id: release.data.id,
+              draft: false
+            });
+
+            console.log('Published release!', release.data.html_url);
