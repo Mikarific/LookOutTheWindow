@@ -56,6 +56,8 @@ export function Pano() {
       panoCanvasCtx.canvas,
       /* mapping: */ THREE.EquirectangularReflectionMapping,
     );
+    skyTexture.colorSpace = THREE.SRGBColorSpace;
+
     return new THREE.Mesh(
       sphereGeo,
       new THREE.MeshBasicMaterial({ map: skyTexture }),
