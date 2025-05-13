@@ -1,6 +1,20 @@
-# look-out-the-window
+# Look Out The Window userscript for [Internet Roadtrip](https://neal.fun/internet-roadtrip)
 
-This is a userscript initiated from [@violentmonkey/generator-userscript](https://github.com/violentmonkey/generator-userscript).
+## How do I get install this?
+
+1. Make sure you have an extension to load userscripts, like [Violentmonkey](https://violentmonkey.github.io/get-it/), [Tampermonkey](https://www.tampermonkey.net/index.php), or [Greasemonkey](https://addons.mozilla.org/en-US/firefox/addon/greasemonkey/)
+
+   > [!NOTE]
+   > If you are on a Chromium-based browser (like Google Chrome), you may need to enable Developer Mode.
+   > Without this, <ins>this userscript may not work</ins>!
+   >
+   > Follow [this guide](https://www.tampermonkey.net/faq.php#Q209) to do learn how to enable Developer Mode.
+   >
+   > Other browsers like Firefox don't have this problem.
+
+2. Get the script by <ins>[clicking here](https://github.com/netux/internet-roadtrip-LookOutTheWindow/releases/latest/download/look-out-the-window.user.js)</ins>.
+
+3. Reload any Internet Roadtrip tabs you have open.
 
 ## Development
 
