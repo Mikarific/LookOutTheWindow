@@ -19,7 +19,8 @@ export function Pano() {
     /* near: */ 0.1,
     /* far: */ 1000,
   );
-  camera.position.set(-0.3, 0, 0);
+  camera.position.set(0, 0, -0.3);
+  camera.rotation.y = THREE.MathUtils.degToRad(-90);
 
   const light = new THREE.DirectionalLight(0xffffff, 1);
   light.position.set(100, 100, 0);
@@ -80,17 +81,12 @@ export function Pano() {
     panoTexture.needsUpdate = true;
     skyMesh.material.needsUpdate = true;
 
+    skyMesh.rotation.y = store.currentHeading;
     // skyMesh.scale.y = panoCanvasCtx.canvas.height / panoCanvasCtx.canvas.width; // squish vertically to adjust to the aspect ratio of the equirectangular texture
 
     rerender();
   }
   effect(renderCurrentPano);
-
-  effect(() => {
-    skyMesh.rotation.y = store.currentHeading;
-
-    rerender();
-  });
 
   const [getVehicleObject, setVehicleObject] =
     createSignal<THREE.Object3D | null>(null);
@@ -102,7 +98,7 @@ export function Pano() {
         'https://cloudy.netux.site/neal_internet_roadtrip/vehicle/model.glb',
       )
       .then(({ scene: vehicleObject }) => {
-        vehicleObject.position.set(0, -1, 0);
+        vehicleObject.position.y = -1;
         vehicleObject.getObjectByName('steering_wheel')!.visible = false;
 
         setVehicleObject(vehicleObject);
