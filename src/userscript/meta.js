@@ -2,7 +2,7 @@
 // @name        Internet Roadtrip - Look Out The Window
 // @namespace   me.netux.site/user-scripts/internet-roadtrip-look-out-the-window
 // @match       https://neal.fun/internet-roadtrip/*
-// @icon        https://www.google.com/s2/favicons?sz=64&domain=neal.fun
+// @icon        https://neal.fun/favicons/internet-roadtrip.png
 // @version     PACKAGE_JSON_VERSION
 // @grant       GM_addStyle
 // @grant       GM.xmlHttpRequest
