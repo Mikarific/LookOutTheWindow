@@ -57,6 +57,14 @@
   & > label {
     width: 100%;
   }
+
+  & > input[type='range'] {
+    width: 100%;
+  }
+
+  & > label:has(+ input[type='range']) {
+    width: min-content;
+  }
 }
 
 .setting-group {

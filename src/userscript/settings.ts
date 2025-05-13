@@ -4,6 +4,10 @@ const STORAGE_KEY = `internet-roadtrip/LookOutTheWindow/settings/v2`;
 
 const DEFAULT_SETTINGS: Settings = {
   showVehicle: true,
+  ambientNoise: {
+    play: false,
+    volume: 0.2,
+  },
 };
 
 export function loadSettings(): Settings {

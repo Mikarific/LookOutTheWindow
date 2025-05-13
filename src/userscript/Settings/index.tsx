@@ -37,6 +37,53 @@ export function Settings() {
             </div>
           </div>
         </div>
+        <div class={styles['setting-group']}>
+          <div class={styles['setting-group__heading']}>
+            <span>Ambient noise</span>
+            <div class={styles['setting']}>
+              <input
+                id={inputId('ambient-noise-play')}
+                type="checkbox"
+                checked={!store.settings.ambientNoise.play}
+                on:change={(event) =>
+                  setStore({
+                    settings: {
+                      ...store.settings,
+                      ambientNoise: {
+                        ...store.settings.ambientNoise,
+                        play: !event.currentTarget.checked,
+                      },
+                    },
+                  })
+                }
+              />
+              <label for={inputId('ambient-noise-play')}>Mute</label>
+            </div>
+          </div>
+          <div class={styles['setting']}>
+            <label for={inputId('ambient-noise-volume')}>Volume</label>
+            <input
+              id={inputId('ambient-noise-volume')}
+              type="range"
+              min={0}
+              max={1}
+              step={0.005}
+              title={`${Math.floor(store.settings.ambientNoise.volume * 100)}%`}
+              value={store.settings.ambientNoise.volume}
+              on:input={(event) =>
+                setStore({
+                  settings: {
+                    ...store.settings,
+                    ambientNoise: {
+                      ...store.settings.ambientNoise,
+                      volume: parseFloat(event.currentTarget.value),
+                    },
+                  },
+                })
+              }
+            />
+          </div>
+        </div>
       </div>
       <div
         class={styles['settings-panel__toggle']}

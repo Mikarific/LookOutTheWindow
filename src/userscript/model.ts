@@ -7,6 +7,10 @@ export enum Direction {
 
 export interface Settings {
   showVehicle: boolean;
+  ambientNoise: {
+    play: boolean;
+    volume: number;
+  };
 }
 
 export interface Store {
