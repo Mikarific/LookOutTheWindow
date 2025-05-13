@@ -52,18 +52,8 @@ export function Pano() {
       /* z: */ 1,
     );
 
-    const skyTexture = new THREE.CanvasTexture(
-      panoCanvasCtx.canvas,
-      /* mapping: */ THREE.EquirectangularReflectionMapping,
-    );
-    skyTexture.colorSpace = THREE.SRGBColorSpace;
-
-    return new THREE.Mesh(
-      sphereGeo,
-      new THREE.MeshBasicMaterial({ map: skyTexture }),
-    );
+    return new THREE.Mesh(sphereGeo, new THREE.MeshBasicMaterial());
   }
-
   const skyMesh = createSkyMesh();
   scene.add(skyMesh);
 
@@ -74,8 +64,18 @@ export function Pano() {
 
     await streetview.loadAndRender(store.currentPano, panoCanvasCtx);
 
-    skyMesh.material.map!.needsUpdate = true;
-    scene.environment = skyMesh.material.map;
+    const panoTexture = new THREE.CanvasTexture(
+      panoCanvasCtx.canvas,
+      /* mapping: */ THREE.EquirectangularReflectionMapping,
+    );
+    panoTexture.colorSpace = THREE.SRGBColorSpace;
+
+    skyMesh.material.map = panoTexture;
+    scene.environment = panoTexture;
+
+    panoTexture.needsUpdate = true;
+    skyMesh.material.needsUpdate = true;
+
     // skyMesh.scale.y = panoCanvasCtx.canvas.height / panoCanvasCtx.canvas.width; // squish vertically to adjust to the aspect ratio of the equirectangular texture
 
     rerender();
