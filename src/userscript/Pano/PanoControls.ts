@@ -6,7 +6,7 @@ export class PanoControls extends EventTarget {
 
   public rotateSpeed = 0.15;
   public zoomSpeed: number = 0.05;
-  public zoomClamp: [min: number, max: number] = [10, 75];
+  public zoomClamp: [min: number, max: number] = [10, 100];
 
   private rotateStartCoords: {
     mouseX: number;
