@@ -18,7 +18,10 @@
 
 ## Development
 
-``` sh
+```sh
+# Install dependencies
+$ npm install
+
 # Compile and watch
 $ npm run dev
 
@@ -28,3 +31,6 @@ $ npm run build
 # Lint
 $ npm run lint
 ```
+
+> [!TIP]
+> Violentmonkey provides a nice way to automatically reload the built userscript. Learn how to set that up: [How to edit scripts with your favorite editor?](https://violentmonkey.github.io/posts/how-to-edit-scripts-with-your-favorite-editor/)
