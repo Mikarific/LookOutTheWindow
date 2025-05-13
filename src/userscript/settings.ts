@@ -14,7 +14,10 @@ export function loadSettings(): Settings {
 
   try {
     const storageValue = JSON.parse(rawStorageValue) as Settings;
-    return storageValue;
+    return {
+      ...DEFAULT_SETTINGS,
+      ...storageValue,
+    };
   } catch (error) {
     console.error('Could not load LookOutTheWindow settings', error);
     return DEFAULT_SETTINGS;
