@@ -2,10 +2,10 @@ name: Release new UserScript version
 
 on:
   push:
-    branches:
-      - test/github-workflow
-    # tags:
-    #   - 'v*'
+    # branches:
+    #   - test/github-workflow
+    tags:
+      - 'v*'
 
 jobs:
   build:
