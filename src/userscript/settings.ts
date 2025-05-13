@@ -1,4 +1,4 @@
-import { Settings } from '../model';
+import { Settings } from './model';
 
 const STORAGE_KEY = `internet-roadtrip/LookOutTheWindow/settings/v2`;
 

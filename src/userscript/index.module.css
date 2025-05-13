@@ -47,12 +47,31 @@
   padding: 4px 8px;
   display: flex;
   align-items: center;
+  font-weight: normal;
+  gap: 4px;
+
+  .setting-group & {
+    padding: 0;
+  }
 
   & > label {
     width: 100%;
   }
+}
 
-  & > input[type='checkbox'] + label {
-    padding-inline: 0.8ch;
+.setting-group {
+  padding: 4px 8px;
+  display: flex;
+  align-items: center;
+  flex-direction: column;
+
+  &__heading {
+    width: 100%;
+    margin-bottom: 4px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    font-weight: bold;
   }
 }

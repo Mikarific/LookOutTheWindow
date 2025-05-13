@@ -16,18 +16,26 @@ export function Settings() {
       }}
     >
       <div class={styles['settings-panel__content']}>
-        <div class={styles['setting']}>
-          <input
-            id={inputId('show-vehicle')}
-            type="checkbox"
-            checked={store.settings.showVehicle}
-            on:change={(event) =>
-              setStore({
-                settings: { showVehicle: event.currentTarget.checked },
-              })
-            }
-          />
-          <label for={inputId('show-vehicle')}>Show vehicle</label>
+        <div class={styles['setting-group']}>
+          <div class={styles['setting-group__heading']}>
+            <span>Vehicle</span>
+            <div class={styles['setting']}>
+              <input
+                id={inputId('vehicle-show')}
+                type="checkbox"
+                checked={store.settings.showVehicle}
+                on:change={(event) =>
+                  setStore({
+                    settings: {
+                      ...store.settings,
+                      showVehicle: event.currentTarget.checked,
+                    },
+                  })
+                }
+              />
+              <label for={inputId('vehicle-show')}>Show</label>
+            </div>
+          </div>
         </div>
       </div>
       <div
