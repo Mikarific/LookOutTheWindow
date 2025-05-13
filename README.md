@@ -4,15 +4,13 @@
 
 1. Make sure you have an extension to load userscripts, like [Violentmonkey](https://violentmonkey.github.io/get-it/), [Tampermonkey](https://www.tampermonkey.net/index.php), or [Greasemonkey](https://addons.mozilla.org/en-US/firefox/addon/greasemonkey/)
 
-   > [!NOTE]
-   > If you are on a Chromium-based browser (like Google Chrome), you may need to enable Developer Mode.
-   > Without this, <ins>this userscript may not work</ins>!
-   >
-   > Follow [this guide](https://www.tampermonkey.net/faq.php#Q209) to do learn how to enable Developer Mode.
-   >
-   > Other browsers like Firefox don't have this problem.
+    ❗ If you are on a Chromium-based browser (like Google Chrome), you may need to enable Developer Mode.
+    Without this, <ins>this userscript may not work</ins>!
+    Other browsers, like Firefox, don't have this problem.
 
-2. Get the script by <ins>[clicking here](https://github.com/netux/internet-roadtrip-LookOutTheWindow/releases/latest/download/look-out-the-window.user.js)</ins>.
+    Follow [this guide](https://www.tampermonkey.net/faq.php#Q209) to do learn how to enable Developer Mode.
+
+2. Get the script by [clicking here](https://github.com/netux/internet-roadtrip-LookOutTheWindow/releases/latest/download/look-out-the-window.user.js).
 
 3. Reload any Internet Roadtrip tabs you have open.
 
