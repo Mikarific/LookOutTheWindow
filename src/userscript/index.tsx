@@ -58,11 +58,13 @@ framework.vdom.container.then((vdomContainer) => {
 
 framework.dom.container.then(async (containerEl) => {
   requestIdleCallback(() => {
-    const originalPanoEl = containerEl.querySelector('#pano')!;
+    const lastOriginalPanoEl = Array.from(
+      containerEl.querySelectorAll('[id^="pano"]'),
+    ).at(-1)!;
 
     const appContainerEl = document.createElement('div');
     appContainerEl.setAttribute('data-look-out-the-window-root', '');
-    originalPanoEl.insertAdjacentElement('afterend', appContainerEl);
+    lastOriginalPanoEl.insertAdjacentElement('afterend', appContainerEl);
 
     render(() => <App />, appContainerEl);
   });
