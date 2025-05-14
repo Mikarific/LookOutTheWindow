@@ -14,8 +14,7 @@ import { setStore } from './store.js';
 }
 
 framework.vdom.container.then(async (vdomContainer) => {
-  vdomContainer.state._computedWatchers.panoUrl.getter = () =>
-    'data:text/plain,';
+  vdomContainer.methods.getPanoUrl = () => 'data:text/plain,';
 });
 
 framework.vdom.container.then((vdomContainer) => {
