@@ -74,12 +74,14 @@ export function Pano() {
       /* mapping: */ THREE.EquirectangularReflectionMapping,
     );
     panoTexture.colorSpace = THREE.SRGBColorSpace;
-
-    skyMesh.material.map = panoTexture;
-    scene.environment = panoTexture;
-
     panoTexture.needsUpdate = true;
+
+    skyMesh.material.opacity = 1;
+    skyMesh.material.transparent = false;
+    skyMesh.material.map = panoTexture;
     skyMesh.material.needsUpdate = true;
+
+    scene.environment = panoTexture;
 
     skyMesh.rotation.y = store.currentHeading;
     // skyMesh.scale.y = panoCanvasCtx.canvas.height / panoCanvasCtx.canvas.width; // squish vertically to adjust to the aspect ratio of the equirectangular texture
