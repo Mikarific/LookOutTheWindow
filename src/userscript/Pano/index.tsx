@@ -84,7 +84,6 @@ export function Pano() {
     scene.environment = panoTexture;
 
     skyMesh.rotation.y = store.currentHeading;
-    // skyMesh.scale.y = panoCanvasCtx.canvas.height / panoCanvasCtx.canvas.width; // squish vertically to adjust to the aspect ratio of the equirectangular texture
 
     rerender();
   }
