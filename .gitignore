@@ -1,5 +1,6 @@
 node_modules
 *.log
+.env*
 /.idea
 /dist
 /.nyc_output
