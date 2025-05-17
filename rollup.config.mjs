@@ -38,7 +38,7 @@ const externalModuleMapping = {
       as: 'THREE'
     }
   ],
-  'https://cdn.jsdelivr.net/npm/internet-roadtrip-framework': [
+  'https://cdn.jsdelivr.net/npm/internet-roadtrip-framework@0.3.0-beta': [
     {
       provides: 'internet-roadtrip-framework',
       as: 'IRF'
