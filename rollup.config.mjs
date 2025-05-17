@@ -24,80 +24,98 @@ const iifeRequireGlobalsMapping = Object.fromEntries(
     .map(({ provides, as }) => [provides, as])
 );
 
-export default defineConfig({
-  input: 'src/userscript/index.tsx',
-  plugins: [
-    postcssPlugin({
-      inject: false,
-      minimize: true,
-    }),
-    babelPlugin({
-      // import helpers from '@babel/runtime'
-      babelHelpers: 'runtime',
-      plugins: [
-        [
-          import.meta.resolve('@babel/plugin-transform-runtime'),
-          {
-            useESModules: true,
-            version: '^7.5.0', // see https://github.com/babel/babel/issues/10261#issuecomment-514687857
-          },
+const nealFunGlobalsMapping = {
+  'howler': 'unsafeWindow'
+};
+
+/**
+ * @param {object} options
+ * @param {'production' | 'development'} options.env
+ * @returns {import('rollup').RollupOptions}
+ */
+function generateConfig({ env }) {
+  const outputFileName = `look-out-the-window${env === 'development' ? '-dev' : ''}.user.js`;
+
+  return {
+    input: 'src/userscript/index.tsx',
+    plugins: [
+      postcssPlugin({
+        inject: false,
+        minimize: true,
+      }),
+      babelPlugin({
+        // import helpers from '@babel/runtime'
+        babelHelpers: 'runtime',
+        plugins: [
+          [
+            import.meta.resolve('@babel/plugin-transform-runtime'),
+            {
+              useESModules: true,
+              version: '^7.5.0', // see https://github.com/babel/babel/issues/10261#issuecomment-514687857
+            },
+          ],
         ],
-      ],
-      exclude: 'node_modules/**',
-      extensions,
-    }),
-    replacePlugin({
-      values: {
-        'process.env.NODE_ENV': JSON.stringify(process.env.NODE_ENV),
+        exclude: 'node_modules/**',
+        extensions,
+      }),
+      replacePlugin({
+        values: {
+          'IS_DEV': (env === 'development').toString()
+        },
+        preventAssignment: true,
+      }),
+      resolvePlugin({ browser: false, extensions }),
+      commonjsPlugin(),
+      jsonPlugin(),
+      userscript((meta) => {
+        meta = meta.replace('PACKAGE_JSON_VERSION', packageJson.version);
+
+        const metaLines = meta.split('\n');
+
+        let metaEndLineIdx = metaLines.indexOf('// ==/UserScript==');
+        if (metaEndLineIdx < 0) {
+          metaEndLineIdx = metaLines.length - 1;
+        }
+
+        const addedLines = [
+          `// @author ${[
+            packageJson.author?.name,
+            ... (
+              packageJson.contributors?.map((contributor) =>
+                typeof contributor === 'string'
+                  ? contributor
+                  : contributor.name
+              ) ?? []
+            )
+          ].filter((authorName) => !!authorName).join(', ')}`,
+          ...userScriptRequireUrls.map((url) => `// @require ${url}`)
+        ];
+
+        metaLines.splice(metaEndLineIdx, /* deleteCount: */ 0, ...addedLines)
+
+        return metaLines.join('\n');
+      }),
+    ],
+    external: defineExternal([
+      ...ownExternalModules,
+      ...Object.keys(nealFunGlobalsMapping)
+    ]),
+    output: {
+      format: 'iife',
+      file: `dist/${outputFileName}`,
+      globals: {
+        ...iifeRequireGlobalsMapping,
+        ...nealFunGlobalsMapping
       },
-      preventAssignment: true,
-    }),
-    resolvePlugin({ browser: false, extensions }),
-    commonjsPlugin(),
-    jsonPlugin(),
-    userscript((meta) => {
-      meta = meta.replace('PACKAGE_JSON_VERSION', packageJson.version);
-
-      const metaLines = meta.split('\n');
-
-      let metaEndLineIdx = metaLines.indexOf('// ==/UserScript==');
-      if (metaEndLineIdx < 0) {
-        metaEndLineIdx = metaLines.length - 1;
-      }
-
-      const addedLines = [
-        `// @author ${[
-          packageJson.author?.name,
-          ... (
-            packageJson.contributors?.map((contributor) =>
-              typeof contributor === 'string'
-                ? contributor
-                : contributor.name
-            ) ?? []
-          )
-        ].filter((authorName) => !!authorName).join(', ')}`,
-        ...userScriptRequireUrls.map((url) => `// @require ${url}`)
-      ];
-
-      metaLines.splice(metaEndLineIdx, /* deleteCount: */ 0, ...addedLines)
-
-      return metaLines.join('\n');
-    }),
-  ],
-  external: defineExternal([
-    ...ownExternalModules,
-    'howler'
-  ]),
-  output: {
-    format: 'iife',
-    file: `dist/look-out-the-window.user.js`,
-    globals: {
-      ...iifeRequireGlobalsMapping,
-      'howler': 'unsafeWindow'
+      indent: false,
     },
-    indent: false,
-  },
-});
+  };
+}
+
+export default defineConfig([
+  generateConfig({ env: 'production' }),
+  generateConfig({ env: 'development' }),
+]);
 
 function defineExternal(externals) {
   return (id) =>
