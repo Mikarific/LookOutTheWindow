@@ -2,13 +2,13 @@ import { Howl } from 'howler';
 import { effect } from 'solid-js/web';
 import { store } from '../store';
 import { createSignal } from 'solid-js';
-import * as framework from 'internet-roadtrip-framework';
+import IRF from 'internet-roadtrip-framework';
 
 export function AmbientNoise() {
   const [getIsWebSocketConnected, setIsWebSocketConnected] =
     createSignal(false);
 
-  framework.vdom.container.then((vdomContainer) => {
+  IRF.vdom.container.then((vdomContainer) => {
     const websocket = vdomContainer.state.ws as WebSocket;
 
     if (websocket.readyState === WebSocket.OPEN) {

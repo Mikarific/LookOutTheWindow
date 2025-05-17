@@ -1,6 +1,6 @@
 import './meta.js?userscript-metadata';
 
-import framework from 'internet-roadtrip-framework';
+import IRF from 'internet-roadtrip-framework';
 import globalStylesheet from './global.css';
 import { stylesheet as moduleStylesheet } from './index.module.css';
 import { App } from './App.jsx';
@@ -13,13 +13,13 @@ import { setStore } from './store.js';
   document.head.appendChild(styleEl);
 }
 
-framework.vdom.container.then(async (vdomContainer) => {
+IRF.vdom.container.then(async (vdomContainer) => {
   vdomContainer.state.getPanoUrl = new Proxy(vdomContainer.methods.getPanoUrl, {
     apply: () => 'data:text/plain,',
   });
 });
 
-framework.vdom.container.then((vdomContainer) => {
+IRF.vdom.container.then((vdomContainer) => {
   const { set: currentPanoSetter } = Object.getOwnPropertyDescriptor(
     vdomContainer.state,
     'currentPano',
@@ -58,7 +58,7 @@ framework.vdom.container.then((vdomContainer) => {
   });
 });
 
-framework.dom.container.then(async (containerEl) => {
+IRF.dom.container.then(async (containerEl) => {
   requestIdleCallback(() => {
     const lastOriginalPanoEl = Array.from(
       containerEl.querySelectorAll('[id^="pano"]'),
