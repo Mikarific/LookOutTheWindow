@@ -14,7 +14,9 @@ import { setStore } from './store.js';
 }
 
 framework.vdom.container.then(async (vdomContainer) => {
-  vdomContainer.methods.getPanoUrl = () => 'data:text/plain,';
+  vdomContainer.state.getPanoUrl = new Proxy(vdomContainer.methods.getPanoUrl, {
+    apply: () => 'data:text/plain,',
+  });
 });
 
 framework.vdom.container.then((vdomContainer) => {
