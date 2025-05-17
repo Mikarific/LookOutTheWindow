@@ -13,18 +13,21 @@ import { setStore } from './store.js';
   document.head.appendChild(styleEl);
 }
 
-IRF.vdom.container.then(async (vdomContainer) => {
-  vdomContainer.state.getPanoUrl = new Proxy(vdomContainer.methods.getPanoUrl, {
+type PromiseResult<P> = P extends Promise<infer T> ? T : never;
+type ContainerVDOM = PromiseResult<typeof IRF.vdom.container>;
+
+function patchOutPanoUrl(containerVDOM: ContainerVDOM) {
+  containerVDOM.state.getPanoUrl = new Proxy(containerVDOM.methods.getPanoUrl, {
     apply: () => 'data:text/plain,',
   });
-});
+}
 
-IRF.vdom.container.then((vdomContainer) => {
+function patchSetCurrentPanoAndHeading(containerVDOM: ContainerVDOM) {
   const { set: currentPanoSetter } = Object.getOwnPropertyDescriptor(
-    vdomContainer.state,
+    containerVDOM.state,
     'currentPano',
   )!;
-  Object.defineProperty(vdomContainer.state, 'currentPano', {
+  Object.defineProperty(containerVDOM.state, 'currentPano', {
     set(currentPano: string) {
       setStore({
         currentPano: currentPano || null,
@@ -37,10 +40,10 @@ IRF.vdom.container.then((vdomContainer) => {
   });
 
   const { set: currentHeadingSetter } = Object.getOwnPropertyDescriptor(
-    vdomContainer.state,
+    containerVDOM.state,
     'currentHeading',
   )!;
-  Object.defineProperty(vdomContainer.state, 'currentHeading', {
+  Object.defineProperty(containerVDOM.state, 'currentHeading', {
     set(currentHeading: number) {
       setStore({
         currentHeading: currentHeading || 0,
@@ -53,21 +56,26 @@ IRF.vdom.container.then((vdomContainer) => {
   });
 
   setStore({
-    currentPano: vdomContainer.data.currentPano || null,
-    currentHeading: vdomContainer.data.currentHeading || 0,
+    currentPano: containerVDOM.data.currentPano || null,
+    currentHeading: containerVDOM.data.currentHeading || 0,
   });
-});
+}
 
-IRF.dom.container.then(async (containerEl) => {
-  requestIdleCallback(() => {
-    const lastOriginalPanoEl = Array.from(
-      containerEl.querySelectorAll('[id^="pano"]'),
-    ).at(-1)!;
+function insertAppComponent(containerVDOM: ContainerVDOM) {
+  const appContainerEl = document.createElement('div');
+  appContainerEl.setAttribute('data-look-out-the-window-root', '');
 
-    const appContainerEl = document.createElement('div');
-    appContainerEl.setAttribute('data-look-out-the-window-root', '');
-    lastOriginalPanoEl.insertAdjacentElement('afterend', appContainerEl);
+  const lastOriginalPanoEl = Object.keys(containerVDOM.$refs)
+    .filter((key) => key.startsWith('pano'))
+    .map((key): HTMLIFrameElement => containerVDOM.$refs[key])
+    .at(-1)!;
+  lastOriginalPanoEl.insertAdjacentElement('afterend', appContainerEl);
 
-    render(() => <App />, appContainerEl);
-  });
+  render(() => <App />, appContainerEl);
+}
+
+IRF.vdom.container.then((vdomContainer) => {
+  patchOutPanoUrl(vdomContainer);
+  patchSetCurrentPanoAndHeading(vdomContainer);
+  insertAppComponent(vdomContainer);
 });
