@@ -96,7 +96,9 @@ export function Pano() {
     const gltfLoader = new GLTFLoader();
     gltfLoader
       .loadAsync(
-        'https://cloudy.netux.site/neal_internet_roadtrip/vehicle/model.glb',
+        IS_DEV
+          ? `https://cloudy.netux.site/neal_internet_roadtrip/vehicle/model.glb?v=${Date.now()}`
+          : 'https://cloudy.netux.site/neal_internet_roadtrip/vehicle/model.glb',
       )
       .then(({ scene: vehicleObject }) => {
         vehicleObject.position.y = -1;
