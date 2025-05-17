@@ -24,11 +24,8 @@ const iifeRequireGlobalsMapping = Object.fromEntries(
     .map(({ provides, as }) => [provides, as])
 );
 
-export default defineConfig(
-  /** @type {import('rollup').RollupOptions} */(Object.entries({
-  'look-out-the-window': 'src/userscript/index.tsx',
-}).map(([name, entry]) => ({
-  input: entry,
+export default defineConfig({
+  input: 'src/userscript/index.tsx',
   plugins: [
     postcssPlugin({
       inject: false,
@@ -93,15 +90,14 @@ export default defineConfig(
   ]),
   output: {
     format: 'iife',
-    file: `dist/${name}.user.js`,
+    file: `dist/look-out-the-window.user.js`,
     globals: {
       ...iifeRequireGlobalsMapping,
       'howler': 'unsafeWindow'
     },
     indent: false,
   },
-}))),
-);
+});
 
 function defineExternal(externals) {
   return (id) =>
