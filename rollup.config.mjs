@@ -1,50 +1,19 @@
+import fs from 'node:fs';
+import { isAbsolute, relative, resolve } from 'node:path';
+import { readPackageUp } from 'read-package-up';
+import JSONC from 'tiny-jsonc';
+import { defineConfig } from 'rollup';
 import babelPlugin from '@rollup/plugin-babel';
 import commonjsPlugin from '@rollup/plugin-commonjs';
 import jsonPlugin from '@rollup/plugin-json';
 import resolvePlugin from '@rollup/plugin-node-resolve';
 import replacePlugin from '@rollup/plugin-replace';
-import { isAbsolute, relative, resolve } from 'path';
-import { readPackageUp } from 'read-package-up';
-import { defineConfig } from 'rollup';
 import postcssPlugin from 'rollup-plugin-postcss';
 import userscript from 'rollup-plugin-userscript';
 
 const { packageJson } = /** @type {import('read-package-up').NormalizedReadResult} */ (await readPackageUp());
 const extensions = ['.ts', '.tsx', '.mjs', '.js', '.jsx'];
-const externalModuleMapping = {
-  'https://cdn.jsdelivr.net/npm/@violentmonkey/dom@2/dist/solid.min.js': [
-    {
-      provides: 'solid-js',
-      as: 'VM.solid'
-    },
-    {
-      provides: 'solid-js/web',
-      as: 'VM.solid.web'
-    },
-    {
-      provides: 'solid-js/store',
-      as: 'VM.solid.store'
-    }
-  ],
-  'https://cdn.jsdelivr.net/npm/three@0.147.0/build/three.min.js': [ // TODO(netux): migrate to a newer version of three.js?
-    {
-      provides: 'three',
-      as: 'THREE'
-    }
-  ],
-  'https://cdn.jsdelivr.net/npm/three@0.147.0/examples/js/loaders/GLTFLoader.js': [
-    {
-      provides: 'three/examples/jsm/loaders/GLTFLoader',
-      as: 'THREE'
-    }
-  ],
-  'https://cdn.jsdelivr.net/npm/internet-roadtrip-framework@0.3.0-beta': [
-    {
-      provides: 'internet-roadtrip-framework',
-      as: 'IRF'
-    }
-  ]
-};
+const externalModuleMapping = JSONC.parse(fs.readFileSync('./external-dependency-mapping.jsonc', 'utf-8'));
 
 const ownExternalModules = Object.values(externalModuleMapping)
   .flatMap((mapping) => mapping.map(({ provides }) => provides));
