@@ -24,7 +24,7 @@
   },
   "dependencies": {
     "@babel/runtime": "^7.24.1",
-    "internet-roadtrip-framework": "0.3.0-beta",
+    "internet-roadtrip-framework": "0.3.2-beta",
     "solid-js": "^1.8.16",
     "three": "0.147.0"
   },
