@@ -1,0 +1,11 @@
+.wheel-container,
+.place,
+.voted,
+.results,
+.drivers {
+	pointer-events: none;
+}
+
+.wheel-click-area {
+	pointer-events: initial;
+}

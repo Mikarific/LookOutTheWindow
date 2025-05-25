@@ -1,130 +1,94 @@
-import fs from 'node:fs';
-import { isAbsolute, relative, resolve } from 'node:path';
-import { readPackageUp } from 'read-package-up';
-import JSONC from 'tiny-jsonc';
-import { defineConfig } from 'rollup';
-import babelPlugin from '@rollup/plugin-babel';
-import commonjsPlugin from '@rollup/plugin-commonjs';
-import jsonPlugin from '@rollup/plugin-json';
-import resolvePlugin from '@rollup/plugin-node-resolve';
-import replacePlugin from '@rollup/plugin-replace';
-import postcssPlugin from 'rollup-plugin-postcss';
-import userscript from 'rollup-plugin-userscript';
+import { defineConfig } from "rollup";
 
-const { packageJson } = /** @type {import('read-package-up').NormalizedReadResult} */ (await readPackageUp());
-const extensions = ['.ts', '.tsx', '.mjs', '.js', '.jsx'];
-const externalModuleMapping = JSONC.parse(fs.readFileSync('./external-dependency-mapping.jsonc', 'utf-8'));
+import babelPlugin from "@rollup/plugin-babel";
+import postcssPlugin from "rollup-plugin-postcss";
+import replacePlugin from "@rollup/plugin-replace";
+import resolvePlugin from "@rollup/plugin-node-resolve";
+import commonjsPlugin from "@rollup/plugin-commonjs";
+import jsonPlugin from "@rollup/plugin-json";
+import userscript from "rollup-plugin-userscript";
 
-const ownExternalModules = Object.values(externalModuleMapping)
-  .flatMap((mapping) => mapping.map(({ provides }) => provides));
-const userScriptRequireUrls = Object.keys(externalModuleMapping)
-const iifeRequireGlobalsMapping = Object.fromEntries(
-  Object.values(externalModuleMapping)
-    .flat()
-    .map(({ provides, as }) => [provides, as])
-);
+import { readPackageUp } from "read-package-up";
+const { packageJson } = await readPackageUp();
 
-const nealFunGlobalsMapping = {
-  'howler': 'unsafeWindow'
-};
+import { isAbsolute, relative, resolve } from "path";
 
-/**
- * @param {object} options
- * @param {'production' | 'development'} options.env
- * @returns {import('rollup').RollupOptions}
- */
-function generateConfig({ env }) {
-  const outputFileName = `look-out-the-window${env === 'development' ? '-dev' : ''}.user.js`;
-
-  return {
-    input: 'src/userscript/index.tsx',
+export default defineConfig([
+  {
+    input: "src/index.ts",
     plugins: [
       postcssPlugin({
         inject: false,
         minimize: true,
       }),
       babelPlugin({
-        // import helpers from '@babel/runtime'
-        babelHelpers: 'runtime',
+        babelHelpers: "runtime",
         plugins: [
           [
-            import.meta.resolve('@babel/plugin-transform-runtime'),
+            import.meta.resolve("@babel/plugin-transform-runtime"),
             {
               useESModules: true,
-              version: '^7.5.0', // see https://github.com/babel/babel/issues/10261#issuecomment-514687857
+              version: "^7.5.0",
             },
           ],
         ],
-        exclude: 'node_modules/**',
-        extensions,
+        exclude: "node_modules/**",
+        extensions: [".ts", ".tsx", ".mjs", ".js", ".jsx"],
       }),
       replacePlugin({
         values: {
-          'IS_DEV': (env === 'development').toString()
+          "process.env.NODE_ENV": JSON.stringify(process.env.NODE_ENV),
         },
         preventAssignment: true,
       }),
-      resolvePlugin({ browser: false, extensions }),
+      resolvePlugin({
+        browser: false,
+        extensions: [".ts", ".tsx", ".mjs", ".js", ".jsx"],
+      }),
       commonjsPlugin(),
       jsonPlugin(),
       userscript((meta) => {
-        meta = meta.replace('PACKAGE_JSON_VERSION', packageJson.version);
+				const authors = [
+					packageJson.author?.name,
+					...(packageJson.contributors?.map((contributor) => typeof contributor === 'string' ? contributor : contributor.name) ?? [])
+				].filter((authorName) => typeof authorName === 'string' && authorName !== '').join(', ');
 
-        const metaLines = meta.split('\n');
-
-        let metaEndLineIdx = metaLines.indexOf('// ==/UserScript==');
-        if (metaEndLineIdx < 0) {
-          metaEndLineIdx = metaLines.length - 1;
-        }
-
-        const addedLines = [
-          `// @author ${[
-            packageJson.author?.name,
-            ... (
-              packageJson.contributors?.map((contributor) =>
-                typeof contributor === 'string'
-                  ? contributor
-                  : contributor.name
-              ) ?? []
-            )
-          ].filter((authorName) => !!authorName).join(', ')}`,
-          ...userScriptRequireUrls.map((url) => `// @require ${url}`)
-        ];
-
-        metaLines.splice(metaEndLineIdx, /* deleteCount: */ 0, ...addedLines)
-
-        return metaLines.join('\n');
-      }),
+				return meta
+          .replace("process.env.AUTHOR", authors)
+          .replace("process.env.VERSION", packageJson.version)
+          .replace("process.env.LICENSE", packageJson.license)
+			}),
     ],
     external: defineExternal([
-      ...ownExternalModules,
-      ...Object.keys(nealFunGlobalsMapping)
+      "solid-js",
+      "solid-js/web",
+			"internet-roadtrip-framework",
+			"three",
+			"three/examples/jsm/loaders/GLTFLoader"
     ]),
     output: {
-      format: 'iife',
-      file: `dist/${outputFileName}`,
+      format: "iife",
+      file: `dist/InternetRoadtripPano.user.js`,
       globals: {
-        ...iifeRequireGlobalsMapping,
-        ...nealFunGlobalsMapping
+        "solid-js": "VM.solid",
+        "solid-js/web": "VM.solid.web",
+        "internet-roadtrip-framework": "IRF",
+				"three": "THREE",
+				"three/examples/jsm/loaders/GLTFLoader": "THREE"
       },
       indent: false,
     },
-  };
-}
-
-export default defineConfig([
-  generateConfig({ env: 'production' }),
-  generateConfig({ env: 'development' }),
+  },
 ]);
 
 function defineExternal(externals) {
   return (id) =>
     externals.some((pattern) => {
-      if (typeof pattern === 'function') return pattern(id);
-      if (pattern && typeof pattern.test === 'function')
+      if (typeof pattern === "function") return pattern(id);
+      if (pattern && typeof pattern.test === "function")
         return pattern.test(id);
       if (isAbsolute(pattern))
-        return !relative(pattern, resolve(id)).startsWith('..');
-      return id === pattern || id.startsWith(pattern + '/');
+        return !relative(pattern, resolve(id)).startsWith("..");
+      return id === pattern || id.startsWith(pattern + "/");
     });
 }

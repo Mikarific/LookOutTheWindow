@@ -1,0 +1,39 @@
+@unocss preflights;
+
+.pano {
+	@apply fixed top-0 left-0 w-full h-full;
+	@apply cursor-move;
+	@apply z--2;
+}
+
+.settings-item {
+	@apply flex;
+	@apply grid grid-cols-[auto_1fr_auto] items-center;
+}
+
+.settings-item > hr {
+	@apply w-full;
+	@apply text-transparent bg-transparent;
+	@apply border-1 border-dashed border-[#41474b];
+}
+
+.setting {
+	@apply m-3;
+}
+
+.slider-value {
+	@apply my-3 mr-3;
+	@apply w-12;
+	@apply text-center leading-6;
+}
+
+.slider-stops {
+	@apply flex justify-between;
+	@apply px-2.5;
+	@apply h-0 translate-y-[2px];
+	@apply text-3 text-[#aaa];
+}
+
+.slider-stops > span.active {
+	@apply text-[#fff];
+}
