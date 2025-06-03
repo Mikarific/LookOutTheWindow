@@ -162,9 +162,8 @@ export function renderPanoFromId(
 				}
 			}
 		})
-		.catch((e) => {
-			console.error(e);
-			console.error(`Couldn't load metadata for panoId: ${panoId}`);
+		.catch((err) => {
+			console.error(`Couldn't load metadata for panoId: ${panoId}`, err);
 			renderErrorPano(scene, panoId);
 		});
 }
