@@ -1,4 +1,5 @@
 import * as IRF from 'internet-roadtrip-framework';
+import { For } from 'solid-js';
 import { render } from 'solid-js/web';
 
 import styles, { stylesheet as moduleCss } from '../style.module.css';
@@ -94,12 +95,9 @@ if (IRF.isInternetRoadtrip) {
 							onInput={({ target }) => setMaxZoom(parseInt(target.value))}
 						/>
 						<div class={styles['slider-stops']}>
-							<span class={getMaxZoom() >= 0 ? styles['active'] : ''}>0</span>
-							<span class={getMaxZoom() >= 1 ? styles['active'] : ''}>1</span>
-							<span class={getMaxZoom() >= 2 ? styles['active'] : ''}>2</span>
-							<span class={getMaxZoom() >= 3 ? styles['active'] : ''}>3</span>
-							<span class={getMaxZoom() >= 4 ? styles['active'] : ''}>4</span>
-							<span class={getMaxZoom() >= 5 ? styles['active'] : ''}>5</span>
+							<For each={[0, 1, 2, 3, 4, 5]}>
+								{(zoom) => <span class={getMaxZoom() >= zoom ? styles['active'] : ''}>{zoom}</span>}
+							</For>
 						</div>
 					</div>
 				</div>
