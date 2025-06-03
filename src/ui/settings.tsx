@@ -71,9 +71,9 @@ if (IRF.isInternetRoadtrip) {
 						<input
 							type="range"
 							class={IRF.ui.panel.styles.slider}
-							min="0"
-							max="100"
-							step="1"
+							min={0}
+							max={100}
+							step={1}
 							value={getNoiseVolume()}
 							onInput={({ target }) => setNoiseVolume(parseInt(target.value))}
 							disabled={!getNoiseActive()}
@@ -87,9 +87,9 @@ if (IRF.isInternetRoadtrip) {
 						<input
 							type="range"
 							class={IRF.ui.panel.styles.slider}
-							min="0"
-							max="5"
-							step="1"
+							min={0}
+							max={5}
+							step={1}
 							value={getMaxZoom()}
 							onInput={({ target }) => setMaxZoom(parseInt(target.value))}
 						/>
