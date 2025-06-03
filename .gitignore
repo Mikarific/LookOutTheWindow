@@ -8,4 +8,3 @@ node_modules
 /types
 /docs
 bun.lockb
-package-lock.json

@@ -20,9 +20,9 @@ if (IRF.isInternetRoadtrip) {
 				<div class={styles['settings-item']}>
 					<span class={styles['setting']}>Vehicle</span>
 					<hr />
-					<div class={styles['setting']} on:mousedown={(e) => e.stopPropagation()}>
+					<div class={styles['setting']}>
 						<input
-							type='checkbox'
+							type="checkbox"
 							class={IRF.ui.panel.styles.toggle}
 							checked={getVehicle()}
 							onClick={() => setVehicle(!getVehicle())}
@@ -32,9 +32,9 @@ if (IRF.isInternetRoadtrip) {
 				<div class={styles['settings-item']}>
 					<span class={styles['setting']}>Rotate Wheel w/ Camera</span>
 					<hr />
-					<div class={styles['setting']} on:mousedown={(e) => e.stopPropagation()}>
+					<div class={styles['setting']}>
 						<input
-							type='checkbox'
+							type="checkbox"
 							class={IRF.ui.panel.styles.toggle}
 							checked={getWheelRotation()}
 							onClick={() => setWheelRotation(!getWheelRotation())}
@@ -44,9 +44,9 @@ if (IRF.isInternetRoadtrip) {
 				<div class={styles['settings-item']}>
 					<span class={styles['setting']}>Rotate Options w/ Camera</span>
 					<hr />
-					<div class={styles['setting']} on:mousedown={(e) => e.stopPropagation()}>
+					<div class={styles['setting']}>
 						<input
-							type='checkbox'
+							type="checkbox"
 							class={IRF.ui.panel.styles.toggle}
 							checked={getOptionsRotation()}
 							onClick={() => setOptionsRotation(!getOptionsRotation())}
@@ -56,9 +56,9 @@ if (IRF.isInternetRoadtrip) {
 				<div class={styles['settings-item']}>
 					<span class={styles['setting']}>Ambient Noise</span>
 					<hr />
-					<div class={styles['setting']} on:mousedown={(e) => e.stopPropagation()}>
+					<div class={styles['setting']}>
 						<input
-							type='checkbox'
+							type="checkbox"
 							class={IRF.ui.panel.styles.toggle}
 							checked={getNoiseActive()}
 							onClick={() => setNoiseActive(!getNoiseActive())}
@@ -67,13 +67,13 @@ if (IRF.isInternetRoadtrip) {
 				</div>
 				<div class={styles['settings-item']}>
 					<span class={styles['setting']}>Noise Volume</span>
-					<div class={styles['setting']} on:mousedown={(e) => e.stopPropagation()}>
+					<div class={styles['setting']}>
 						<input
-							type='range'
+							type="range"
 							class={IRF.ui.panel.styles.slider}
-							min='0'
-							max='100'
-							step='1'
+							min="0"
+							max="100"
+							step="1"
 							value={getNoiseVolume()}
 							onInput={({ target }) => setNoiseVolume(parseInt(target.value))}
 							disabled={!getNoiseActive()}
@@ -83,13 +83,13 @@ if (IRF.isInternetRoadtrip) {
 				</div>
 				<div class={styles['settings-item']}>
 					<span class={styles['setting']}>Panorama Quality</span>
-					<div class={styles['setting']} on:mousedown={(e) => e.stopPropagation()}>
+					<div class={styles['setting']}>
 						<input
-							type='range'
+							type="range"
 							class={IRF.ui.panel.styles.slider}
-							min='0'
-							max='5'
-							step='1'
+							min="0"
+							max="5"
+							step="1"
 							value={getMaxZoom()}
 							onInput={({ target }) => setMaxZoom(parseInt(target.value))}
 						/>

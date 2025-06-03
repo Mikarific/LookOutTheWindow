@@ -19,7 +19,7 @@
 // @downloadURL https://github.com/netux/internet-roadtrip-LookOutTheWindow/releases/latest/download/look-out-the-window.user.js
 // @updateURL   https://github.com/netux/internet-roadtrip-LookOutTheWindow/releases/latest/download/look-out-the-window.user.js
 // @require     https://cdn.jsdelivr.net/npm/@violentmonkey/dom@2/dist/solid.min.js
-// @require     https://cdn.jsdelivr.net/npm/internet-roadtrip-framework@0.4.0-beta
+// @require     https://cdn.jsdelivr.net/npm/internet-roadtrip-framework@0.4.1-beta
 // @require     https://cdn.jsdelivr.net/npm/three@0.160.1/build/three.min.js
 // @require     https://cdn.jsdelivr.net/npm/three@0.147.0/examples/js/loaders/GLTFLoader.js
 // @grant       GM_addStyle
