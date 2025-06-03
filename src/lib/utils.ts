@@ -1,4 +1,4 @@
-export function fetch(
+export function GM_fetch(
 	details: VMScriptGMXHRDetails<string | object | Document | Blob | ArrayBuffer>,
 ): Promise<VMScriptResponseObject<string | object | Document | Blob | ArrayBuffer>> {
 	return new Promise((resolve, reject) => {
