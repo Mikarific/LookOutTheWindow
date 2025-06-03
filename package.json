@@ -2,7 +2,7 @@
 	"name": "look-out-the-window",
 	"version": "2.0.0",
 	"description": "Replace the static google street view image with a full panorama, and \"Look Out The Window\".",
-	"author": "Martín \"Netux\" Rodriguez",
+	"author": "netux",
 	"contributors": [
 		"Mikarific",
 		"Jakub"

@@ -77,6 +77,7 @@ export function renderPanoFromId(
 				renderErrorPano(scene, panoId);
 				return;
 			}
+			// Google Maps API incantation
 			const zoom = Math.min(meta[1][0][2][3][0].length - 1, maxZoom);
 			const tileWidth = meta[1][0][2][3][1][0];
 			const tileHeight = meta[1][0][2][3][1][1];
@@ -161,9 +162,8 @@ export function renderPanoFromId(
 				}
 			}
 		})
-		.catch((e) => {
-			console.error(e);
-			console.error(`Couldn't load metadata for panoId: ${panoId}`);
+		.catch((err) => {
+			console.error(`Couldn't load metadata for panoId: ${panoId}`, err);
 			renderErrorPano(scene, panoId);
 		});
 }
