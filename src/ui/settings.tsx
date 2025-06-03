@@ -11,7 +11,7 @@ import { getMaxZoom, setMaxZoom } from '../pano/scene';
 
 if (IRF.isInternetRoadtrip) {
 	const { container: settings } = IRF.ui.panel.createTabFor(
-		{ ...GM.info, script: { name: 'LOtW' } },
+		{ ...GM.info, script: { ... GM.info.script, name: GM.info.script.name.replace('Internet Roadtrip - ', '') } },
 		{ tabName: 'LOtW', style: moduleCss },
 	);
 

@@ -15,6 +15,7 @@ export function animatePano(scene: THREE.Scene) {
 		.forEach((pano) => {
 			if (pano !== newPano && pano !== oldPano) scene.remove(pano);
 		});
+
 	if (newPano !== null) {
 		const now = performance.now();
 		const elapsed = now - panoFadeTime;
