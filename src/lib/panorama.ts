@@ -146,6 +146,43 @@ function decodePanoId(panoId: string): Panorama {
 	}
 }
 
+// Currently unused, but might as well have it in case it's needed.
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+function encodePanoId(pano: Panorama) {
+	// If the panorama is official, the ID does not need to be encoded.
+	if (pano.type === PanoramaType.OFFICIAL) return pano.id;
+
+	const encodeVarint = (num: number): number[] => {
+		const bytes: number[] = [];
+		while (num >= 0x80) {
+			bytes.push((num & 0x7f) | 0x80);
+			num >>>= 7;
+		}
+		bytes.push(num);
+		return bytes;
+	};
+
+	const encodeLen = (str: string): number[] => {
+		const bytes = new TextEncoder().encode(str);
+		return [...encodeVarint(bytes.length), ...bytes];
+	};
+
+	// 0x08 is 00001000 in binary, so this corresponds to...
+	// Field Number: 00001 (1)
+	// Wire Type: 000 (0) which corresponds to VARINT
+	const panoType = [0x08, ...encodeVarint(pano.type)];
+	// 0x12 is 00010010 in binary, so this corresponds to...
+	// Field Number: 00010 (2)
+	// Wire Type: 010 (2) which corresponds to LEN
+	const panoId = [0x12, ...encodeLen(pano.id)];
+
+	// Base64 encode the new protobuf, and make it URL safe
+	return btoa(String.fromCharCode(...new Uint8Array([...panoType, ...panoId])))
+		.replaceAll('+', '-')
+		.replaceAll('/', '_')
+		.replaceAll('=', '.');
+}
+
 export async function getPanoMetadataFromId(panoId: string) {
 	const { type, id } = decodePanoId(panoId);
 	try {
