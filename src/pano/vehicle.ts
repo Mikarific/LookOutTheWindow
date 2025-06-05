@@ -2,6 +2,8 @@ import { createEffect, createSignal } from 'solid-js';
 import * as THREE from 'three';
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader';
 
+import { RenderOrder } from '../lib/panorama';
+
 export const [getVehicle, setVehicle] = createSignal((GM_getValue('vehicle') as boolean) ?? true);
 
 export function createVehicle(scene: THREE.Scene) {
@@ -15,7 +17,7 @@ export function createVehicle(scene: THREE.Scene) {
 			vehicleObject.getObjectByName('steering_wheel')!.visible = false;
 
 			vehicleObject.traverse((child) => {
-				if (child instanceof THREE.Mesh) child.renderOrder = 2;
+				if (child instanceof THREE.Mesh) child.renderOrder = RenderOrder.VEHICLE;
 			});
 
 			scene.add(vehicleObject);

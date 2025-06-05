@@ -5,7 +5,13 @@ import * as THREE from 'three';
 
 import styles from '../style.module.css';
 
-import { animatePano, getPanoMetadataFromId, renderPanoFromMetadata } from '../lib/panorama';
+import {
+	animatePano,
+	getPanoMetadataFromId,
+	removeOldPanos,
+	renderErrorPano,
+	renderPanoFromMetadata,
+} from '../lib/panorama';
 import { createControls } from './controls';
 import { createVehicle } from './vehicle';
 
@@ -54,9 +60,13 @@ if (IRF.isInternetRoadtrip) {
 		// If it's not, it'll be set the next time getPanoUrl is called.
 		// TODO: Overwrite the setter of currentPano to initialize if currentPano isn't set.
 		if (vContainer.data.currentPano !== '') {
-			getPanoMetadataFromId(vContainer.data.currentPano).then((meta) => {
-				const heading = vContainer.data.currentHeading;
-				if (meta !== null) renderPanoFromMetadata(meta, scene, pmremGenerator, heading, getMaxZoom());
+			const panoId = vContainer.data.currentPano;
+			const heading = vContainer.data.currentHeading;
+			getPanoMetadataFromId(panoId).then((meta) => {
+				if (meta === null) return renderErrorPano(panoId, scene);
+				renderPanoFromMetadata(meta, scene, pmremGenerator, heading, getMaxZoom()).catch(() => {
+					renderErrorPano(meta.pano, scene);
+				});
 			});
 		}
 
@@ -68,8 +78,12 @@ if (IRF.isInternetRoadtrip) {
 				const panoId: string = args[0];
 				const heading: number = args[1];
 				getPanoMetadataFromId(panoId).then((meta) => {
-					if (meta !== null) renderPanoFromMetadata(meta, scene, pmremGenerator, heading, getMaxZoom());
+					if (meta === null) return renderErrorPano(panoId, scene);
+					renderPanoFromMetadata(meta, scene, pmremGenerator, heading, getMaxZoom()).catch(() => {
+						renderErrorPano(meta.pano, scene);
+					});
 				});
+				if (document.hidden) removeOldPanos(scene);
 				return 'data:text/plain,';
 			},
 		});

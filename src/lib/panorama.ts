@@ -2,65 +2,74 @@ import * as THREE from 'three';
 
 import { GM_fetch } from './utils';
 
-enum PanoramaType {
+export enum PanoramaType {
 	OFFICIAL = 2,
 	UNOFFICIAL = 10,
 }
 
-type Panorama = {
+export type Panorama = {
 	type: PanoramaType;
 	id: string;
 };
 
-const TAU = 2 * Math.PI;
-const geometryCache = {};
+export enum RenderOrder {
+	OLD_PANO = 0,
+	NEW_PANO = 1,
+	VEHICLE = 2,
+}
 
 let oldPano: THREE.Group | THREE.Mesh | null = null;
 let newPano: THREE.Group | THREE.Mesh | null = null;
 let panoFadeTime = performance.now();
+const FADE_DURATION = 300;
 
-export function animatePano(scene: THREE.Scene) {
-	scene.children
-		.filter((child) => child.name === 'panorama')
-		.forEach((pano) => {
-			if (pano !== newPano && pano !== oldPano) scene.remove(pano);
-		});
-
-	if (newPano !== null) {
-		const now = performance.now();
-		const elapsed = now - panoFadeTime;
-		const t = Math.min(elapsed / 300, 1);
-
-		if (newPano instanceof THREE.Group) {
-			newPano.traverse((child) => {
-				if (child instanceof THREE.Mesh) {
-					child.material.opacity = t;
-				}
-			});
-		} else if (newPano instanceof THREE.Mesh) {
-			(newPano.material as THREE.Material[]).forEach((material) => {
-				material.opacity = t;
-			});
-		}
-
-		if (t >= 1) {
-			if (oldPano !== null) scene.remove(oldPano);
-			oldPano = newPano;
-			newPano = null;
-			if (oldPano instanceof THREE.Group) {
-				oldPano.traverse((child) => {
-					if (child instanceof THREE.Mesh) {
-						child.renderOrder = 0;
-					}
-				});
-			} else if (oldPano instanceof THREE.Mesh) {
-				oldPano.renderOrder = 0;
+function fadeOutPano(scene: THREE.Scene) {
+	if (oldPano !== null) scene.remove(oldPano);
+	oldPano = newPano;
+	newPano = null;
+	if (oldPano instanceof THREE.Group) {
+		oldPano.traverse((child) => {
+			if (child instanceof THREE.Mesh) {
+				child.renderOrder = RenderOrder.OLD_PANO;
 			}
-		}
+		});
+	} else if (oldPano instanceof THREE.Mesh) {
+		oldPano.renderOrder = RenderOrder.OLD_PANO;
 	}
 }
 
-function decodePanoId(panoId: string): Panorama {
+export function animatePano(scene: THREE.Scene) {
+	if (newPano !== null) {
+		const now = performance.now();
+		const elapsed = now - panoFadeTime;
+		const t = Math.min(elapsed / FADE_DURATION, 1);
+
+		if (newPano instanceof THREE.Group) {
+			newPano.traverse((child) => {
+				if (child instanceof THREE.Mesh) child.material.opacity = t;
+			});
+		} else if (newPano instanceof THREE.Mesh) {
+			(newPano.material as THREE.Material[]).forEach((material) => (material.opacity = t));
+		}
+
+		if (t >= 1) fadeOutPano(scene);
+	}
+}
+
+export function removeOldPanos(scene: THREE.Scene) {
+	for (let i = scene.children.length - 1; i >= 0; i--) {
+		if (scene.children[i].name === 'panorama' && scene.children[i] !== newPano && scene.children[i] !== oldPano) {
+			scene.remove(scene.children[i]);
+		}
+	}
+
+	const now = performance.now();
+	const elapsed = now - panoFadeTime;
+	const t = Math.min(elapsed / FADE_DURATION, 1);
+	if (t >= 1) fadeOutPano(scene);
+}
+
+export function decodePanoId(panoId: string): Panorama {
 	try {
 		// Cursed Protobuf Parsing Bullshit
 
@@ -147,8 +156,7 @@ function decodePanoId(panoId: string): Panorama {
 }
 
 // Currently unused, but might as well have it in case it's needed.
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
-function encodePanoId(pano: Panorama) {
+export function encodePanoId(pano: Panorama) {
 	// If the panorama is official, the ID does not need to be encoded.
 	if (pano.type === PanoramaType.OFFICIAL) return pano.id;
 
@@ -259,147 +267,187 @@ function getTileUrl(pano: Panorama, x: number, y: number, zoom: number) {
 	}
 }
 
+const envCanvas = document.createElement('canvas');
+const envContext = envCanvas.getContext('2d')!;
+
+const envTexture = new THREE.CanvasTexture(envCanvas);
+envTexture.mapping = THREE.EquirectangularReflectionMapping;
+envTexture.colorSpace = THREE.SRGBColorSpace;
+
+function setSceneEnvironment(
+	meta: PanoMetadata,
+	scene: THREE.Scene,
+	pmremGenerator: THREE.PMREMGenerator,
+	heading: number,
+) {
+	// TODO: Allow different environment quality levels (requires stitching multiple tiles together)
+
+	// The environment doesn't need to be high quality,
+	// so get the entire panorama as a single tile by using zoom level 0
+	const { cropWidth, cropHeight } = meta.zoomLevels[0];
+
+	envCanvas.width = cropWidth;
+	envCanvas.height = cropHeight;
+
+	// Get amount of pixels to shift by to simulate a yaw turn according to meta.heading
+	// so that the environment actually faces the direction we're driving.
+	const shift = Math.floor((((360 + (90 - meta.heading) + heading) % 360) / 360) * cropWidth);
+
+	const image = new Image();
+	image.crossOrigin = 'anonymous';
+	image.src = getTileUrl(meta.pano, 0, 0, 0);
+	image.onerror = console.error;
+
+	image.onload = () => {
+		envContext.clearRect(0, 0, cropWidth, cropHeight);
+
+		// The image is drawn twice here in order to accomodate the yaw shift.
+		// Once from the shifted point to the end of the canvas...
+		envContext.drawImage(image, shift, 0, cropWidth - shift, cropHeight, 0, 0, cropWidth - shift, cropHeight);
+		// and again from the start of the canvas to the shift point.
+		envContext.drawImage(image, 0, 0, shift, cropHeight, cropWidth - shift, 0, shift, cropHeight);
+		// This approach isn't perfect, the environment isn't going to correct for pitch and roll.
+		// But it doesn't have to be, the environment is only used for lighting and reflections.
+
+		envTexture.needsUpdate = true;
+
+		const envMap = pmremGenerator.fromEquirectangular(envTexture).texture;
+		scene.environment = envMap;
+	};
+}
+
+const TAU = 2 * Math.PI;
+const geometryCache = {};
+
 type PanoMetadata = NonNullable<Awaited<ReturnType<typeof getPanoMetadataFromId>>>;
-export function renderPanoFromMetadata(
+export async function renderPanoFromMetadata(
 	meta: PanoMetadata,
 	scene: THREE.Scene,
 	pmremGenerator: THREE.PMREMGenerator,
 	heading: number,
 	maxZoom: number,
-) {
-	const zoom = Math.min(meta.maxZoom, maxZoom);
+): Promise<THREE.Group<THREE.Object3DEventMap>> {
+	return new Promise((resolve, reject) => {
+		const zoom = Math.min(meta.maxZoom, maxZoom);
 
-	const sliceHorizontal = TAU / (meta.zoomLevels[zoom].cropWidth / meta.tileWidth);
-	const sliceVertical = Math.PI / (meta.zoomLevels[zoom].cropHeight / meta.tileHeight);
+		const sliceHorizontal = TAU / (meta.zoomLevels[zoom].cropWidth / meta.tileWidth);
+		const sliceVertical = Math.PI / (meta.zoomLevels[zoom].cropHeight / meta.tileHeight);
 
-	const panorama = new THREE.Group();
-	panorama.name = 'panorama';
-	panorama.rotation.order = 'YZX';
-	panorama.rotation.set(
-		THREE.MathUtils.degToRad((360 + meta.roll) % 360),
-		THREE.MathUtils.degToRad((360 + (90 - meta.heading) + heading) % 360),
-		THREE.MathUtils.degToRad((360 + (meta.tilt - 90)) % 360),
-	);
+		const panorama = new THREE.Group();
+		panorama.name = 'panorama';
+		panorama.rotation.order = 'YZX';
+		panorama.rotation.set(
+			THREE.MathUtils.degToRad((360 + meta.roll) % 360),
+			THREE.MathUtils.degToRad((360 + (90 - meta.heading) + heading) % 360),
+			THREE.MathUtils.degToRad((360 + (meta.tilt - 90)) % 360),
+		);
 
-	const loadingManager = new THREE.LoadingManager();
-	loadingManager.onLoad = () => {
-		newPano = panorama;
-		scene.add(panorama);
-		panoFadeTime = performance.now();
-		setSceneEnvironment(meta.pano, scene, pmremGenerator, meta.zoomLevels[0].cropWidth, meta.zoomLevels[0].cropHeight);
-	};
-	loadingManager.onError = (url) => {
-		console.error(`Couldn't load tile: ${url}`);
-		// renderErrorPano(scene, meta.panoId);
-	};
+		const loadingManager = new THREE.LoadingManager();
+		loadingManager.onLoad = () => {
+			newPano = panorama;
+			scene.add(panorama);
+			panoFadeTime = performance.now();
+			setSceneEnvironment(meta, scene, pmremGenerator, heading);
+			resolve(panorama);
+		};
+		loadingManager.onError = (url) => {
+			console.error(`Couldn't load tile: ${url}`);
+			reject(`Couldn't load tile: ${url}`);
+		};
 
-	for (let y = 0; y < meta.zoomLevels[zoom].numTilesY; y++) {
-		for (let x = 0; x < meta.zoomLevels[zoom].numTilesX; x++) {
-			const startX = sliceHorizontal * x;
-			let widthX = sliceHorizontal;
-			if (startX + widthX > 2 * Math.PI) widthX = 2 * Math.PI - startX;
+		for (let y = 0; y < meta.zoomLevels[zoom].numTilesY; y++) {
+			for (let x = 0; x < meta.zoomLevels[zoom].numTilesX; x++) {
+				const startX = sliceHorizontal * x;
+				let widthX = sliceHorizontal;
+				if (startX + widthX > 2 * Math.PI) widthX = 2 * Math.PI - startX;
 
-			const startY = sliceVertical * y;
-			let widthY = sliceVertical;
-			if (startY + widthY > Math.PI) widthY = Math.PI - startY;
+				const startY = sliceVertical * y;
+				let widthY = sliceVertical;
+				if (startY + widthY > Math.PI) widthY = Math.PI - startY;
 
-			const scaleX = x == meta.zoomLevels[zoom].numTilesX - 1 ? widthX / sliceHorizontal : 1;
-			const scaleY = y == meta.zoomLevels[zoom].numTilesY - 1 ? widthY / sliceVertical : 1;
-			const shiftY = y == meta.zoomLevels[zoom].numTilesY - 1 ? 1 - widthY / sliceVertical : 0;
+				const scaleX = x == meta.zoomLevels[zoom].numTilesX - 1 ? widthX / sliceHorizontal : 1;
+				const scaleY = y == meta.zoomLevels[zoom].numTilesY - 1 ? widthY / sliceVertical : 1;
+				const shiftY = y == meta.zoomLevels[zoom].numTilesY - 1 ? 1 - widthY / sliceVertical : 0;
 
-			const key = `${startX}_${widthX}_${startY}_${widthY}`;
-			if (!geometryCache[key]) {
-				geometryCache[key] = new THREE.SphereGeometry(999, 32, 16, -startX, -widthX, startY, widthY);
+				// Often, two panoramas will load after each other with the same zoom level and cropWidth/cropHeight.
+				// If this is the case, we don't need to recalculate the SphereGeometry, as we've already done that work.
+				const key = `${startX}_${widthX}_${startY}_${widthY}`;
+				if (!geometryCache[key]) {
+					geometryCache[key] = new THREE.SphereGeometry(999, 32, 16, -startX, -widthX, startY, widthY);
+				}
+
+				const geometry = geometryCache[key];
+				const loader = new THREE.TextureLoader(loadingManager);
+				const texture = loader.load(getTileUrl(meta.pano, x, y, zoom));
+				texture.colorSpace = THREE.SRGBColorSpace;
+				texture.matrixAutoUpdate = false;
+				texture.matrix.set(scaleX, 0, 0, 0, scaleY, shiftY, 0, 0, 1);
+				const material = new THREE.MeshBasicMaterial({
+					map: texture,
+					side: THREE.FrontSide,
+					transparent: true,
+					depthWrite: false,
+					opacity: 0,
+				});
+				const tile = new THREE.Mesh(geometry, material);
+				tile.renderOrder = RenderOrder.NEW_PANO;
+				panorama.add(tile);
 			}
-
-			const geometry = geometryCache[key];
-			const loader = new THREE.TextureLoader(loadingManager);
-			const texture = loader.load(getTileUrl(meta.pano, x, y, zoom));
-			texture.colorSpace = THREE.SRGBColorSpace;
-			texture.matrixAutoUpdate = false;
-			texture.matrix.set(scaleX, 0, 0, 0, scaleY, shiftY, 0, 0, 1);
-			const material = new THREE.MeshBasicMaterial({
-				map: texture,
-				side: THREE.DoubleSide,
-				transparent: true,
-				depthWrite: false,
-				opacity: 0,
-			});
-			const tile = new THREE.Mesh(geometry, material);
-			tile.renderOrder = 1;
-			panorama.add(tile);
 		}
-	}
-}
-
-function setSceneEnvironment(
-	pano: Panorama,
-	scene: THREE.Scene,
-	pmremGenerator: THREE.PMREMGenerator,
-	width: number,
-	height: number,
-) {
-	new Promise((resolve, reject) => {
-		const img = new Image();
-		img.crossOrigin = 'anonymous';
-		img.onload = () => resolve(img);
-		img.onerror = reject;
-		img.src = getTileUrl(pano, 0, 0, 0);
-	}).then((image: HTMLImageElement) => {
-		const canvas = document.createElement('canvas');
-		canvas.width = width;
-		canvas.height = height;
-		const ctx = canvas.getContext('2d')!;
-		const shift = Math.floor((90 / 360) * width);
-		ctx.drawImage(image, shift, 0, width - shift, height, 0, 0, width - shift, height);
-		ctx.drawImage(image, 0, 0, shift, height, width - shift, 0, shift, height);
-
-		const envTexture = new THREE.CanvasTexture(canvas);
-		envTexture.mapping = THREE.EquirectangularReflectionMapping;
-		envTexture.colorSpace = THREE.SRGBColorSpace;
-		const envMap = pmremGenerator.fromEquirectangular(envTexture).texture;
-		scene.environment = envMap;
 	});
 }
 
-// function renderErrorPano(scene: THREE.Scene, panoId: string) {
-// 	const canvas = document.createElement('canvas');
-// 	const ctx = canvas.getContext('2d')!;
-// 	canvas.width = 1024;
-// 	canvas.height = 1024;
-// 	ctx.fillStyle = '#be0039';
-// 	ctx.fillRect(0, 0, canvas.width, canvas.height);
-// 	ctx.lineWidth = 16;
-// 	ctx.strokeStyle = '#6d001a';
-// 	ctx.strokeRect(0, 0, canvas.width, canvas.height);
-// 	if (panoId !== '') {
-// 		ctx.fillStyle = 'white';
-// 		ctx.font = 'bold 60px sans-serif';
-// 		ctx.textAlign = 'center';
-// 		ctx.textBaseline = 'middle';
-// 		ctx.fillText(`Failed to load panorama.`, canvas.width / 2, canvas.height / 2 - 40);
-// 		ctx.font = 'bold 30px sans-serif';
-// 		ctx.fillText(`Send a screenshot to Mika if you see this.`, canvas.width / 2, canvas.height / 2 + 20);
-// 		ctx.font = 'bold 15px sans-serif';
-// 		ctx.fillText(`PanoID: ${panoId}`, canvas.width / 2, canvas.height / 2 + 55);
-// 	}
+const errCanvas = document.createElement('canvas');
+const errContext = errCanvas.getContext('2d')!;
+errCanvas.width = 1024;
+errCanvas.height = 1024;
 
-// 	const texture = new THREE.CanvasTexture(canvas);
-// 	texture.colorSpace = THREE.SRGBColorSpace;
-// 	const material = new THREE.MeshBasicMaterial({
-// 		map: texture,
-// 		side: THREE.DoubleSide,
-// 		transparent: true,
-// 		depthWrite: false,
-// 		opacity: 0,
-// 	});
-// 	const geometry = new THREE.BoxGeometry(999, 999, 999);
-// 	geometry.scale(1, 1, -1);
-// 	const materials = [material, material, material, material, material, material];
-// 	const panorama = new THREE.Mesh(geometry, materials);
-// 	panorama.renderOrder = 1;
+const errTexture = new THREE.CanvasTexture(errCanvas);
+errTexture.colorSpace = THREE.SRGBColorSpace;
 
-// 	newPano = panorama;
-// 	scene.add(panorama);
-// 	panoFadeTime = performance.now();
-// }
+const errorPanoGeometry = new THREE.BoxGeometry(999, 999, 999);
+errorPanoGeometry.scale(1, 1, -1);
+
+export function renderErrorPano(pano: Panorama | string, scene: THREE.Scene) {
+	if (typeof pano === 'string') pano = decodePanoId(pano);
+
+	errContext.clearRect(0, 0, errCanvas.width, errCanvas.height);
+	errContext.fillStyle = '#be0039';
+	errContext.fillRect(0, 0, errCanvas.width, errCanvas.height);
+	errContext.lineWidth = 16;
+	errContext.strokeStyle = '#6d001a';
+	errContext.strokeRect(0, 0, errCanvas.width, errCanvas.height);
+
+	errContext.fillStyle = 'white';
+	errContext.textAlign = 'center';
+	errContext.textBaseline = 'middle';
+
+	errContext.font = 'bold 60px sans-serif';
+	errContext.fillText(`Failed to load panorama.`, errCanvas.width / 2, errCanvas.height / 2 - 40);
+
+	errContext.font = 'bold 30px sans-serif';
+	errContext.fillText(`Send a screenshot to Mika if you see this.`, errCanvas.width / 2, errCanvas.height / 2 + 20);
+
+	errContext.font = 'bold 15px monospace';
+	errContext.fillText(`Type: ${pano.type}; ID: ${pano.id}`, errCanvas.width / 2, errCanvas.height / 2 + 55);
+
+	errTexture.needsUpdate = true;
+
+	const materials = Array(6).fill(
+		new THREE.MeshBasicMaterial({
+			map: errTexture,
+			side: THREE.FrontSide,
+			transparent: true,
+			depthWrite: false,
+			opacity: 0,
+		}),
+	);
+
+	const panorama = new THREE.Mesh(errorPanoGeometry, materials);
+	panorama.renderOrder = RenderOrder.NEW_PANO;
+
+	newPano = panorama;
+	scene.add(panorama);
+	panoFadeTime = performance.now();
+	return panorama;
+}
